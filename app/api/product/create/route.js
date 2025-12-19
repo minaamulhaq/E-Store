@@ -23,17 +23,20 @@ export async function POST(request) {
             description: true,
             media: true,
         });
-        const validatedData = formSchema.parse(payload);
+        const validatedData = formSchema.safeParse(payload);
+        if (!validatedData.success) {
+            return response(false, 400, "Invalid user Input");
+        }
 
         const product = new ProductModel({
-            name: validatedData.name,
-            slug: validatedData.slug,
-            category: validatedData.category,
-            mrp: validatedData.mrp,
-            sellingPrice: validatedData.sellingPrice,
-            discountPercentage: validatedData.discountPercentage,
-            description: encode(validatedData.description),
-            media: validatedData.media,
+            name: validatedData.data.name,
+            slug: validatedData.data.slug,
+            category: validatedData.data.category,
+            mrp: validatedData.data.mrp,
+            sellingPrice: validatedData.data.sellingPrice,
+            discountPercentage: validatedData.data.discountPercentage,
+            description: encode(validatedData.data.description),
+            media: validatedData.data.media,
         });
         await product.save();
         return response(true, 201, "Product created successfully", product);

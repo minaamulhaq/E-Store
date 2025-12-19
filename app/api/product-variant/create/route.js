@@ -25,17 +25,22 @@ export async function POST(request) {
             media: true,
 
         });
-        const validatedData = formSchema.parse(payload);
+        const validatedData = formSchema.safeParse(payload);
+        if (!validatedData.success) {
+            return response(false, 400, "Invalid user Input");
+        }
+
+
 
         const product = new ProductVariantModel({
-            product: validatedData.product,
-            sku: validatedData.sku,
-            color: validatedData.color,
-            size: validatedData.size,
-            mrp: validatedData.mrp,
-            sellingPrice: validatedData.sellingPrice,
-            discountPercentage: validatedData.discountPercentage,
-            media: validatedData.media,
+            product: validatedData.data.product,
+            sku: validatedData.data.sku,
+            color: validatedData.data.color,
+            size: validatedData.data.size,
+            mrp: validatedData.data.mrp,
+            sellingPrice: validatedData.data.sellingPrice,
+            discountPercentage: validatedData.data.discountPercentage,
+            media: validatedData.data.media,
         });
         await product.save();
         return response(true, 201, "Product Variant created successfully", product);

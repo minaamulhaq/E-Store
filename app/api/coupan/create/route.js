@@ -19,13 +19,15 @@ export async function POST(request) {
             minShoppingAmount: true,
             validity: true,
         });
-        const validatedData = formSchema.parse(payload);
-
+        const validatedData = formSchema.safeParse(payload);
+        if (!validatedData.success) {
+            return response(false, 400, "Invalid user Input");
+        }
         const coupan = new CoupanModel({
-            code: validatedData.code,
-            discountPercentage: validatedData.discountPercentage,
-            minShoppingAmount: validatedData.minShoppingAmount,
-            validity: validatedData.validity,
+            code: validatedData.data.code,
+            discountPercentage: validatedData.data.discountPercentage,
+            minShoppingAmount: validatedData.data.minShoppingAmount,
+            validity: validatedData.data.validity,
         });
 
         await coupan.save();

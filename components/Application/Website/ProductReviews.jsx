@@ -15,8 +15,7 @@ import { Textarea } from '@/components/ui/textarea'
 const ProductReviews = ({ product }) => {
     const [loading, setLoading] = useState(false);
     const auth = useSelector((state) => state.auth);
-    console.log("auth in review", auth.auth ? auth.auth._id : "");
-    console.log("productId", product);
+
     const formSchema = reviewSchema.pick({
         productId: true,
         userId: true,
