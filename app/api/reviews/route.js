@@ -61,7 +61,7 @@ export async function GET(request) {
 
         const agregatePipeline = [
             {
-                $Lookup: {
+                $lookup: {
                     from: "products",
                     localField: "product",
                     foreignField: "_id",
