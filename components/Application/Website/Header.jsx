@@ -10,9 +10,11 @@ import { VscAccount } from 'react-icons/vsc'
 import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { FaBars } from "react-icons/fa6";
 import { IoClose } from "react-icons/io5";
+import Search from './Search'
 const Header = () => {
     const auth = useSelector((state) => state.auth.auth);
     const [isMobileMenu, setIsMobileMenu] = useState(false);
+    const [ShowSearch, setShowSearch] = useState(false)
     // console.log("auth from header:", auth);
     return (
         <div className={`bg-white lg:px-32 px-4 border-b`}>
@@ -60,6 +62,7 @@ const Header = () => {
                     <div className='flex justify-between items-center gap-8'>
                         <button type='button'>
                             <IoIosSearch
+                                onClick={() => setShowSearch(!ShowSearch)}
                                 className='text-gray-500 hover:text-primary cursor-pointer'
                                 size={25}
                             />
@@ -86,7 +89,7 @@ const Header = () => {
                 </div>
 
             </div>
-
+            <Search isShow={ShowSearch} />
         </div>
     )
 }

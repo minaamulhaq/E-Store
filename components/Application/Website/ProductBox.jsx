@@ -38,6 +38,7 @@ import ImagePlace from '@/public/assets/images/img-placeholder.webp'
 // Import Slick CSS
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { PRODUCT_DETAILS } from '@/lib/utils';
 
 // --- CUSTOM ARROW COMPONENTS ---
 
@@ -95,12 +96,12 @@ const ProductBox = ({ product }) => {
         <div className='border rounded-lg hover:shadow-lg transition-shadow bg-white group overflow-hidden relative'>
 
             {/* --- SLIDER SECTION --- */}
-            <div className='relative w-full lg:h-[275px] h-[150px]'>
+            <div className='relative w-full lg:h-[230px] h-[150px]'>
                 {/* We add a specific class to styling the dots via CSS below */}
                 <Slider {...settings} className="product-slider h-full">
                     {sliderImages.map((imageItem, index) => (
-                        <div key={index} className='relative w-full lg:h-[275px] h-[150px] outline-none'>
-                            <Link href={`/product/${product._id}`} className='block w-full h-full'>
+                        <div key={index} className='relative w-full lg:h-[230px] h-[150px] outline-none'>
+                            <Link href={PRODUCT_DETAILS(product.slug)} className='block w-full h-full'>
                                 <Image
                                     src={imageItem.secure_url}
                                     alt={product.name}
@@ -117,7 +118,7 @@ const ProductBox = ({ product }) => {
 
             {/* --- DETAILS SECTION --- */}
             <div className='p-3'>
-                <Link href={`/product/${product._id}`} className='block'>
+                <Link href={PRODUCT_DETAILS(product.slug)} className='block'>
                     <h3 className='text-lg font-medium truncate group-hover:text-blue-600 transition-colors'>
                         {product.name}
                     </h3>

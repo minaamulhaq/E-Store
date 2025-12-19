@@ -2,9 +2,12 @@ import { persistReducer, persistStore } from "redux-persist";
 import localStorage from "redux-persist/es/storage";
 import authReducer from "./reducer/authReducer";
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
+import cartRecucer from "./reducer/cartReducer";
+
 
 const rootReducer = combineReducers({
     auth: authReducer,
+    cart: cartRecucer,
 });
 const persistConfig = {
     key: 'root',
