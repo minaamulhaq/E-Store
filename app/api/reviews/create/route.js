@@ -29,15 +29,16 @@ export async function POST(request) {
         }
 
 
+
         const product = new ReviewModel({
             product: validatedData.data.productId,
-            userId: validatedData.data.userId,
+            user: validatedData.data.userId,
             rating: validatedData.data.rating,
             title: validatedData.data.title,
             review: validatedData.data.review,
         });
         await product.save();
-        return response(true, 201, "Product Variant created successfully", product);
+        return response(true, 201, "Product review added successfully", product);
 
     } catch (error) {
         return catchError(error);
