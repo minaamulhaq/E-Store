@@ -9,35 +9,47 @@ export const cartSlice = createSlice({
     reducers: {
         addInToCart: (state, action) => {
             const payload = action.payload;
-            const existProduct = state.products.findIndex(
+            const existProduct = state.products.find(
                 (product) => product.variantId === payload.variantId && product.productId === payload.productId
 
             );
-            if (existProduct < 0) {
+            if (!existProduct) {
                 state.products.push(payload);
-                state.count += 1;
+                state.count++;
             }
         },
         IncreaseQuantity: (state, action) => {
+
             const { productId, variantId } = action.payload;
-            const existProduct = state.products.findIndex(
+
+            const existProduct = state.products.find(
                 (product) => product.variantId === variantId && product.productId === productId)
-            if (existProduct >= 0) {
-                state.products[existProduct].quantity += 1;
+            if (existProduct) {
+                existProduct.quantity += 1;
             }
 
         },
         DecreaseQuantity: (state, action) => {
+
             const { productId, variantId } = action.payload;
-            const existProduct = state.products.findIndex(
+
+            const existProduct = state.products.find(
                 (product) => product.variantId === variantId && product.productId === productId)
-            if (existProduct >= 0 && state.products[existProduct].quantity > 1) {
-                state.products[existProduct].quantity -= 1;
+            if (existProduct && existProduct.quantity > 1) {
+                existProduct.quantity -= 1;
             }
         },
         removeFromCart: (state, action) => {
-            state.products.filter((product) => product.variantId !== action.payload.variantId && product.productId !== action.payload.productId);
-            state.count -= 1;
+            console.log("IncreaseQuantity action:", action);
+            const { productId, variantId } = action.payload;
+            console.log("IncreaseQuantity payload:", action.payload);
+            const exists = state.products.some(
+                (p) => p.productId === productId && p.variantId === variantId
+            );
+            if (exists) {
+                state.products = state.products.filter((product) => product.variantId !== action.payload.variantId && product.productId !== action.payload.productId);
+                state.count -= 1;
+            }
         },
         clearCart: (state) => {
             state.products = [];

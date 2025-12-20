@@ -1,11 +1,11 @@
 import React from 'react'
 
-const CartPage = () => {
+const page = () => {
     return (
         <div>
-            Cart Page
+            Checkout Page
         </div>
     )
 }
 
-export default CartPage
+export default page
