@@ -8,14 +8,12 @@ import { NextResponse } from "next/server";
 
 export async function GET(request) {
     try {
-
         const auth = await isAuthenticated("admin");
         if (!auth.isAuth) {
             return response(false, 401, "Unauthorized", null);
         }
         await connectDB();
         const searchParams = request.nextUrl.searchParams
-
         const start = parseInt(searchParams.get('start') || 0, 10);
         const size = parseInt(searchParams.get('size') || 10, 10);
         const filters = JSON.parse(searchParams.get('filters') || "[]")

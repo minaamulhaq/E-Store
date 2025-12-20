@@ -9,10 +9,10 @@ export async function POST(request) {
     const payload = await request.json();
     try {
 
-        const auth = await isAuthenticated("user");
-        if (!auth.isAuth) {
-            return response(false, 401, "Unauthorized", null,);
-        }
+        // const auth = await isAuthenticated("user");
+        // if (!auth.isAuth) {
+        //     return response(false, 401, "Unauthorized", null,);
+        // }
 
         const formSchema = reviewSchema.pick({
             productId: true,

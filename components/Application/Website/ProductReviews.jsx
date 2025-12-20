@@ -15,11 +15,18 @@ import { Textarea } from '@/components/ui/textarea'
 import { showToast } from '@/lib/showToast'
 import axios from 'axios'
 import Link from 'next/link'
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
+import { Avatar, AvatarImage } from '@/components/ui/avatar'
+import Reviewlist from './Reviewlist'
+import useFetch from '@/hooks/useFetch'
+
 const ProductReviews = ({ product }) => {
+    const queryClient = useQueryClient();
     const [loading, setLoading] = useState(false);
     const auth = useSelector((state) => state.auth);
     const [isReview, setisReview] = useState(false);
     const [currentUrl, setcurrentUrl] = useState('');
+    const [CountData, setCountData] = useState(null);
     const formSchema = reviewSchema.pick({
         productId: true,
         userId: true,
@@ -44,7 +51,7 @@ const ProductReviews = ({ product }) => {
             review: ""
         },
     });
-
+    const { data: reviewDetails, refetch: refetchReviewDetails } = useFetch(`/api/reviews/details?productId=${product}`);
     const HandleSubmitReview = async (value) => {
         console.log(value);
         setLoading(true);
@@ -53,6 +60,8 @@ const ProductReviews = ({ product }) => {
             if (response.success) {
                 form.reset();
                 showToast('success', response.message);
+                queryClient.invalidateQueries({ queryKey: ['product-reviews', product] });
+                refetchReviewDetails();
             } else {
                 showToast('error', response.message);
             }
@@ -62,15 +71,50 @@ const ProductReviews = ({ product }) => {
             setLoading(false);
         }
     }
+
+    const fetchReviews = async (pageParam) => {
+
+        const { data: response } = await axios.get(`/api/reviews/get?productId=${product}&page=${pageParam}&limit=3`);
+        if (!response.success) {
+            return
+        }
+        return response.data;
+
+    }
+
+    const { error, data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
+        queryKey: ['product-reviews', product],
+        queryFn: ({ pageParam = 0 }) => fetchReviews(pageParam),
+        initialPageParam: 0,
+        getNextPageParam: (lastPage, pages) => {
+            return lastPage.nextPage;
+        },
+    })
+
+
+
+
+    useEffect(() => {
+        if (reviewDetails && reviewDetails.success) {
+
+            setCountData(reviewDetails?.data);
+        }
+    }, [reviewDetails])
+
+
+    console.log(CountData);
+
+
     return (
         <div className='shadow border rounded mb-20'>
+
             <div className='p-3 bg-gray-50 border-b'>
                 <h2 className="font-semibold text-2xl">Rating & Reviews</h2>
             </div>
             <div className='p-3 flex justify-between flex-wrap items-center'>
                 <div className='md:w-1/2 w-full md:flex md:gap-10 md:mb-0 mb-5'>
                     <div className='md:w-[180px] w-full md:mb-0 mb-5'>
-                        <h4 className='text-8xl text-center font-bold'>0.0</h4>
+                        <h4 className='text-8xl text-center font-bold'>{CountData ? CountData.averageRating : "0.0"}</h4>
                         <div className='flex justify-center gap-2'>
                             <IoStar />
                             <IoStar />
@@ -79,7 +123,7 @@ const ProductReviews = ({ product }) => {
                             <IoStar />
                         </div>
                         <p className='text-center mt-3'>
-                            (0 Ratings & Reviews)
+                            ({CountData ? CountData.totalReviews : "0"} Ratings & Reviews)
                         </p>
                     </div>
                     <div className='md:w-[calc(100%-180px)] mt-3 flex  items-center'>
@@ -93,10 +137,10 @@ const ProductReviews = ({ product }) => {
                                     </div>
 
 
-                                    <Progress value={20} className="w-full" />
+                                    <Progress value={CountData ? CountData.ratingPercentage[rating] : 0} className="w-full" />
 
                                     {/* Count part (fixed width) */}
-                                    <span className='min-w-[20px] text-sm text-right'>20</span>
+                                    <span className='min-w-[20px] text-sm text-right'>{CountData?.rating[rating] || "0"}</span>
                                 </div>
                             ))}
                         </div>
@@ -183,6 +227,30 @@ const ProductReviews = ({ product }) => {
                 </div>
             }
 
+            <div className='border-t mt-5 p-3'>
+                <h5 className='text-xl font-semibold'>{data?.pages[0]?.totalReviews || 0} Reviews </h5>
+            </div>
+            <div className="mt-3">
+                {data && data?.pages.map((page, pageIndex) => (
+
+                    page.reviews.map((review) => (
+                        <div key={review._id} className='mb-3'>
+                            <Reviewlist review={review} />
+                        </div>
+                    ))
+
+                ))}
+            </div>
+            <div className='flex p-3 '>
+                {hasNextPage &&
+                    <Button
+                        onClick={() => fetchNextPage()}
+                        disabled={isFetchingNextPage}
+                    >
+                        {isFetchingNextPage ? 'Loading more...' : 'Load More'}
+                    </Button>
+                }
+            </div>
         </div >
     )
 }
