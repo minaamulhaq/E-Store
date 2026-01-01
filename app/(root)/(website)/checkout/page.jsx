@@ -23,6 +23,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form'
 import { ButtonLoading } from '@/components/Application/ButtonLoading';
 import { showToast } from '@/lib/showToast';
+import axios from 'axios';
+import { IoCloseCircleSharp, IoCloseSharp } from 'react-icons/io5';
 const page = () => {
     const breadcrumdata = {
         title: "Checkout",
@@ -38,7 +40,10 @@ const page = () => {
     const [isCoupanApplied, setisCoupanApplied] = useState(false)
     const [Subtotal, setSubtotal] = useState(0);
     const [totalDiscount, settotalDiscount] = useState(0);
+    const [CoupanDiscount, setCoupanDiscount] = useState(0);
+    const [Total, setTotal] = useState(0);
     const [coupanLoading, setcoupanLoading] = useState(false);
+    const [coupanCode, setcoupanCode] = useState("")
     useEffect(() => {
         if (varifiedCart && varifiedCart.success) {
             setCartVarified(varifiedCart.data);
@@ -54,9 +59,13 @@ const page = () => {
     useEffect(() => {
         let products = cart.products;
         const amount = products.reduce((acc, item) => acc + (item.sellingPrice * item.quantity), 0);
-        setSubtotal(amount);
+
         const discount = products.reduce((acc, item) => acc + ((item.mrp - item.sellingPrice) * item.quantity), 0);
+        setSubtotal(amount);
+        setTotal(amount);
         settotalDiscount(discount);
+        form.setValue("minShoppingAmount", amount);
+
     }, [cart])
     const coupanFormSchema = coupanValidation.pick({ code: true, minShoppingAmount: true });
     const form = useForm({
@@ -68,8 +77,24 @@ const page = () => {
 
     })
     const applycoupen = async (data) => {
+        console.log("Data", data);
         setcoupanLoading(true);
         try {
+            //const { data: response } = useFetch("/api/coupan/apply", "POST", { code: data.code, minShoppingAmount: Subtotal });
+            const { data: response } = await axios.post("/api/coupan/apply", { code: data.code, minShoppingAmount: Subtotal });
+            if (response && response.success) {
+                setCoupanDiscount((Subtotal * response.data.discountPercentage) / 100);
+                setTotal(Subtotal - (Subtotal * response.data.discountPercentage) / 100);
+                setisCoupanApplied(true);
+                showToast("success", response.message || "Coupan applied successfully");
+                setcoupanCode(form.getValues("code"));
+                form.setValue("code", "");
+            } else {
+                showToast("error", response.message || "Failed to apply coupon");
+            }
+
+
+
 
         } catch (error) {
             showToast("error", error.message || "Failed to apply coupon");
@@ -77,7 +102,12 @@ const page = () => {
             setcoupanLoading(false);
         }
     }
-
+    const removeCoupan = () => {
+        setisCoupanApplied(false);
+        setCoupanDiscount(0);
+        setTotal(Subtotal);
+        setcoupanCode("");
+    }
     return (
         <div>
             <WebsiteBreadcrum props={breadcrumdata} />
@@ -132,16 +162,15 @@ const page = () => {
                                         </tr>
                                         <tr>
                                             <td className='font-medium py-2'>Discount</td>
-                                            <td className='text-end py-2'>${totalDiscount.toFixed()}</td>
+                                            <td className='text-end py-2'>- ${totalDiscount.toFixed()}</td>
                                         </tr>
                                         <tr>
                                             <td className='font-medium py-2'>Coupan Discount</td>
-                                            <td className='text-end py-2'></td>
+                                            <td className='text-end py-2'>- ${CoupanDiscount.toFixed()}</td>
                                         </tr>
                                         <tr>
                                             <td className='font-medium py-2'>Total:</td>
-                                            <td className='text-end py-2'> </td>
-
+                                            <td className='text-end py-2'>${Total.toFixed()}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -174,7 +203,17 @@ const page = () => {
                                         </>
                                         :
                                         <>
+                                            <div className='flex justify-between py-1 px-5 rounded-lg bg-gray-200'>
+                                                <div className=''>
+                                                    <span className='text-xs'>Coupan:</span>
+                                                    <p className='font-semibold text-sm'>{coupanCode}</p>
 
+                                                </div>
+                                                <button onClick={removeCoupan} type="button" className="text-red-500">
+                                                    <IoCloseCircleSharp size={20} className='cursor-pointer ' />
+                                                </button>
+
+                                            </div>
                                         </>}
                                 </div>
 
