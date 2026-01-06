@@ -6,18 +6,16 @@ import {
     FormControl,
     FormField,
     FormItem,
-    FormLabel,
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from '@/components/ui/input';
 import useFetch from '@/hooks/useFetch';
-import { coupanValidation } from '@/lib/zodSchema';
+import { coupanValidation, orderSchema } from '@/lib/zodSchema';
 import { addInToCart, clearCart } from '@/store/reducer/cartReducer';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
-
 import { BsCart2 } from 'react-icons/bs';
 import { useDispatch, useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form'
@@ -25,6 +23,8 @@ import { ButtonLoading } from '@/components/Application/ButtonLoading';
 import { showToast } from '@/lib/showToast';
 import axios from 'axios';
 import { IoCloseCircleSharp, IoCloseSharp } from 'react-icons/io5';
+import { FaShippingFast } from "react-icons/fa";
+import { Textarea } from '@/components/ui/textarea';
 const page = () => {
     const breadcrumdata = {
         title: "Checkout",
@@ -33,6 +33,7 @@ const page = () => {
         ]
     }
     const cart = useSelector((state) => state.cart);
+    const auth = useSelector((state) => state.auth);
     const dispatch = useDispatch();
     const [CartVarified, setCartVarified] = useState([])
     const { data: varifiedCart } = useFetch("/api/cart-varification", "POST", { data: cart.products })
@@ -67,7 +68,38 @@ const page = () => {
         form.setValue("minShoppingAmount", amount);
 
     }, [cart])
+
+    const orderFormSchema = orderSchema.pick({
+        name: true,
+        email: true,
+        phone: true,
+        country: true,
+        state: true,
+        city: true,
+        zip: true,
+        landmark: true,
+        ordernote: true,
+        userId: true,
+
+    })
     const coupanFormSchema = coupanValidation.pick({ code: true, minShoppingAmount: true });
+    // console.log("Auth User:", auth.auth._id);
+    const orderForm = useForm({
+        resolver: zodResolver(orderFormSchema),
+        defaultValues: {
+            name: "",
+            email: "",
+            phone: "",
+            country: "",
+            state: "",
+            city: "",
+            zip: "",
+            landmark: "",
+            ordernote: "",
+            userId: auth?.auth?._id || "",
+        },
+
+    })
     const form = useForm({
         resolver: zodResolver(coupanFormSchema),
         defaultValues: {
@@ -108,6 +140,35 @@ const page = () => {
         setTotal(Subtotal);
         setcoupanCode("");
     }
+    const OrderSubmit = async (data) => {
+        // console.log("Order Data:", data);
+        let orderData = {
+            ...data,
+            products: cart.products,
+            coupan: coupanCode,
+        }
+        // console.log("Final Order Data:", orderData);
+        // Submit orderData to backend API
+        try {
+            const { data: response } = await axios.post("/api/payment/save-order", orderData);
+            if (response && response.success) {
+                showToast("success", response.message || "Order placed successfully");
+                dispatch(clearCart());
+                // Redirect to order success page or order details page
+                router.push(`/order-details/${response.data._id}`);
+
+            } else {
+                showToast("error", response.message || "Failed to place order");
+            }
+            console.log("Order Response:", response);
+        } catch (error) {
+            showToast("error", error.message || "Failed to place order");
+        }
+
+
+
+
+    }
     return (
         <div>
             <WebsiteBreadcrum props={breadcrumdata} />
@@ -122,8 +183,161 @@ const page = () => {
                 :
                 <div className='flex lg:flex-nowrap flex-wrap lg:px-32 my-20 gap-10'>
                     <div className='lg:w-[60%] w-full'>
-                        <h2 className='text-2xl font-semibold mb-6'>Checkout Page</h2>
+
                         {/* Checkout form and details go here */}
+
+                        <div className='flex font-semibold gap-2 items-center mb-3'>
+                            <FaShippingFast size={30} /> Shipping Address
+                        </div>
+
+
+                        <Form {...orderForm}>
+                            <form onSubmit={orderForm.handleSubmit(OrderSubmit)} className='grid grid-cols-2 gap-5 '>
+
+                                <div className='mb-3'>
+                                    <FormField
+                                        control={orderForm.control}
+                                        name="name"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormControl>
+                                                    <Input placeholder="Enter your name" {...field} />
+                                                </FormControl>
+
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                <div className='mb-3'>
+                                    <FormField
+                                        control={orderForm.control}
+                                        name="email"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormControl>
+                                                    <Input placeholder="Email*" {...field} />
+                                                </FormControl>
+
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                <div className='mb-3'>
+                                    <FormField
+                                        control={orderForm.control}
+                                        name="phone"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormControl>
+                                                    <Input placeholder="Phone*" {...field} />
+                                                </FormControl>
+
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                <div className='mb-3'>
+                                    <FormField
+                                        control={orderForm.control}
+                                        name="country"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormControl>
+                                                    <Input placeholder="Country*" {...field} />
+                                                </FormControl>
+
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                <div className='mb-3'>
+                                    <FormField
+                                        control={orderForm.control}
+                                        name="state"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormControl>
+                                                    <Input placeholder="State*" {...field} />
+                                                </FormControl>
+
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                <div className='mb-3'>
+                                    <FormField
+                                        control={orderForm.control}
+                                        name="city"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormControl>
+                                                    <Input placeholder="City*" {...field} />
+                                                </FormControl>
+
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                <div className='mb-3'>
+                                    <FormField
+                                        control={orderForm.control}
+                                        name="zip"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormControl>
+                                                    <Input placeholder="Zip*" {...field} />
+                                                </FormControl>
+
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                <div className='mb-3'>
+                                    <FormField
+                                        control={orderForm.control}
+                                        name="landmark"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormControl>
+                                                    <Input placeholder="Landmark*" {...field} />
+                                                </FormControl>
+
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                <div className='mb-3 col-span-2'>
+                                    <FormField
+                                        control={orderForm.control}
+                                        name="ordernote"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormControl>
+                                                    <Textarea placeholder="Order Note" {...field} />
+                                                </FormControl>
+
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+
+                                <div className='mb-3'>
+                                    <ButtonLoading type="submit" className='rounded-full cursor-pointer' loading={false} text={"Place Order"} />
+                                </div>
+
+                            </form>
+
+                        </Form>
+
                     </div>
                     <div className='lg:w-[40%] w-full'>
                         <div className='rounded bg-gray-50 p-5 sticky top-5'>
