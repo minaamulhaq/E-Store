@@ -43,13 +43,15 @@ export const cartSlice = createSlice({
             console.log("IncreaseQuantity action:", action);
             const { productId, variantId } = action.payload;
             console.log("IncreaseQuantity payload:", action.payload);
-            const exists = state.products.some(
-                (p) => p.productId === productId && p.variantId === variantId
-            );
-            if (exists) {
-                state.products = state.products.filter((product) => product.variantId !== action.payload.variantId && product.productId !== action.payload.productId);
-                state.count -= 1;
-            }
+            console.log("Current state before removal:", productId, variantId, state);
+            // const exists = state.products.find(
+            //     (p) => p.productId === productId && p.variantId === variantId
+            // );
+            // console.log("Product exists in cart:", exists);
+
+            state.products = state.products.filter((product) => product.variantId != action.payload.variantId);
+            state.count -= 1;
+
         },
         clearCart: (state) => {
             state.products = [];

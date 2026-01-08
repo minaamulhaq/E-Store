@@ -25,6 +25,8 @@ import axios from 'axios';
 import { IoCloseCircleSharp, IoCloseSharp } from 'react-icons/io5';
 import { FaShippingFast } from "react-icons/fa";
 import { Textarea } from '@/components/ui/textarea';
+import { useRouter } from 'next/navigation';
+
 const page = () => {
     const breadcrumdata = {
         title: "Checkout",
@@ -32,6 +34,7 @@ const page = () => {
             { name: "checkout", href: "/checkout" },
         ]
     }
+    const router = useRouter();
     const cart = useSelector((state) => state.cart);
     const auth = useSelector((state) => state.auth);
     const dispatch = useDispatch();
@@ -155,7 +158,7 @@ const page = () => {
                 showToast("success", response.message || "Order placed successfully");
                 dispatch(clearCart());
                 // Redirect to order success page or order details page
-                router.push(`/order-details/${response.data._id}`);
+                // router.push(`/order-details/${response.data.orderId}`);
 
             } else {
                 showToast("error", response.message || "Failed to place order");

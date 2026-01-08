@@ -7,15 +7,15 @@ import React from 'react'
 import { HiOutlineShoppingCart } from 'react-icons/hi';
 import { IoCartOutline } from 'react-icons/io5';
 const breadcrumdata = {
-    title: "Dashboard",
+    title: "Order",
     links: [
-        { name: "My Account" }
+        { name: "Orders" }
 
     ]
 };
 const MyAccount = () => {
-    const { data: dashbordData } = useFetch('/api/dashboard/user');
-    console.log("User Dashboard Data:", dashbordData);
+    const { data: OrdersData, loading } = useFetch('/api/user-order');
+    console.log("User Dashboard Data:", OrdersData);
 
     return (
         <div>
@@ -23,34 +23,17 @@ const MyAccount = () => {
             <UserPanalLayout>
                 <div className='shadow rounded'>
 
-                    <div className='p-5 text-xl font-semibold border'>
-                        Dashbord
+                    <div className='p-3 text-xl font-semibold border'>
+                        Orders
                     </div>
-                    <div className="p-5">
-                        <div className="grid lg:grid-cols-2 md:grid-cols-1 gap-10">
-                            <div className="flex items-center justify-between gap-5 border rounded p-3">
-                                <div>
-                                    <h2 className="font-semibold text-lg mb-1">Total Orders</h2>
-                                    <span className="text-gray-500 font-semibold">0</span>
-                                </div>
-                                <div className='w-14 h-14 bg-primary rounded-full flex justify-center items-center'>
-                                    <HiOutlineShoppingCart className='text-white text-2xl' />
-                                </div>
+                    <div className='p-5'>
 
-                            </div>
-                            <div className="flex items-center justify-between gap-5 border rounded p-3">
-                                <div>
-                                    <h2 className="font-semibold text-lg mb-1">Items in Cart</h2>
-                                    <span className="text-gray-500 font-semibold">0</span>
-                                </div>
-                                <div className='w-14 h-14 bg-primary rounded-full flex justify-center items-center'>
-                                    <IoCartOutline className='text-white text-2xl' />
-                                </div>
-                            </div>
-                        </div>
 
-                        <div className='mt-5'>
-                            <h4 className='text-lg font-semibold mb-3'>Recent Orders</h4>
+                        {loading ? (
+                            <div className='flex justify-center items-center py-32'>
+                                <h2>Loading...</h2>
+                            </div>
+                        ) : (
                             <table className='w-full'>
                                 <thead>
                                     <tr className='bg-gray-100'>
@@ -61,7 +44,7 @@ const MyAccount = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {dashbordData && dashbordData.data.recentOrders.length > 0 ? dashbordData.data.recentOrders.map((order, index) => (
+                                    {OrdersData && OrdersData.data.length > 0 ? OrdersData.data.map((order, index) => (
                                         <tr key={order._id} className="border-b">
                                             <td className='p-2 text-sm text-gray-700'>{index + 1}</td>
                                             <td className='p-2 text-sm text-gray-700 text-center'>
@@ -79,9 +62,8 @@ const MyAccount = () => {
                                     )}
                                 </tbody>
                             </table>
-                        </div>
+                        )}
                     </div>
-
                 </div>
 
             </UserPanalLayout>

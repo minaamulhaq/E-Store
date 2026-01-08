@@ -6,11 +6,11 @@ import placeholderImage from '@/public/assets/images/img-placeholder.webp'
 import Link from 'next/link';
 const page = async ({ params }) => {
     const { id } = await params;
-    console.log(`${process.env.NEXT_PUBLIC_API_URL}/orders/get/${id}`)
+
     const { data: OrderData } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/orders/get/${id}`);
     const order = OrderData.data;
 
-    console.log("Order details:", order);
+    // console.log("Order details:", order);
     const breadcrumdata = {
         title: "Order Details",
         links: [

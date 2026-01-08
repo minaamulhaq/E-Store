@@ -53,7 +53,7 @@ const ProductReviews = ({ product }) => {
     });
     const { data: reviewDetails, refetch: refetchReviewDetails } = useFetch(`/api/reviews/details?productId=${product}`);
     const HandleSubmitReview = async (value) => {
-        console.log(value);
+        // console.log(value);
         setLoading(true);
         try {
             const { data: response } = await axios.post('/api/reviews/create', value);
@@ -92,8 +92,6 @@ const ProductReviews = ({ product }) => {
     })
 
 
-
-
     useEffect(() => {
         if (reviewDetails && reviewDetails.success) {
 
@@ -101,8 +99,6 @@ const ProductReviews = ({ product }) => {
         }
     }, [reviewDetails])
 
-
-    console.log(CountData);
 
 
     return (
