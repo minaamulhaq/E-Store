@@ -7,7 +7,14 @@ import React from 'react'
 import { IoIosArrowRoundForward } from 'react-icons/io'
 import ProductBox from './ProductBox';
 const FeacherProduct = async () => {
-    const { data: productData } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/product/get-feature-product`);
+    let productData = { data: [] };
+    try {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/product/get-feature-product`);
+        productData = res.data;
+    } catch (error) {
+        console.error('Failed to fetch featured products:', error.message);
+        productData = { data: [] }; // fallback to empty array
+    }
 
     if (!productData) return <div>Loading...</div>;
 
